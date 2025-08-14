@@ -7,9 +7,6 @@ pipeline {
         disableResume()
         disableConcurrentBuilds abortPrevious: true
     }
-   environment {
-    MONGO_URI = "mongodb://\${MONGO_USERNAME}:\${MONGO_PASSWORD}@127.0.0.1:27017/superData?authSource=admin"
-    }
 
     stages {
         stage('Installing dependencies') {
@@ -23,7 +20,7 @@ pipeline {
             parallel {
                 stage('NPM dependencies audit') {
                     steps {
-                        sh 'npm audit  --audit-level=critical'
+                        sh 'npm audit --audit-level=critical'
                         sh 'echo $?'
                     }
                 }
@@ -49,7 +46,10 @@ pipeline {
                     usernameVariable: 'MONGO_USERNAME',
                     passwordVariable: 'MONGO_PASSWORD'
                 )]) {
-                    sh 'npm test'
+                    sh '''
+                        export MONGO_URI="mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@127.0.0.1:27017/superData?authSource=admin"
+                        npm test
+                    '''
                 }
                 junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
