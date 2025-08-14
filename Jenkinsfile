@@ -3,11 +3,16 @@ pipeline {
     tools {
         nodejs 'nodejs-22.6.0'
     }
+    options {
+        disableResume()
+        disableConcurrentBuilds abortPrevious: true
+    }
     environment {
         MONGO_URI = "mongodb://\${MONGO_USERNAME}:\${MONGO_PASSWORD}@127.0.0.1:27017/superData"
     }
     stages {
         stage('Installing dependencies') {
+            options { timestamps() }
             steps {
                 sh 'npm install --no-audit'
             }
@@ -36,6 +41,7 @@ pipeline {
         }
 
         stage('Unit tests') {
+            options { retry(2) }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'mongo-credintials',
