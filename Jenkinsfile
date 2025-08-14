@@ -32,12 +32,14 @@ pipeline {
                 }
                 
                 }
-                stage('Unit tests') {
-                    steps {
-                        sh 'npm test'
-                    }
+                
             }
-
+        
+        stage('Unit tests') {
+            steps {
+                sh 'npm test'
+            }
         }
     }
 }
+
