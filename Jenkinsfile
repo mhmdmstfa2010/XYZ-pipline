@@ -25,11 +25,12 @@ pipeline {
                             --scan \'./\' 
                                 --out \'./\' 
                                 --format \'ALL/\'
-                                --prettyprint''', odcInstallation: 'OWASP-DependencyCheck-10' 
+                                --prettyPrint''', odcInstallation: 'OWASP-DependencyCheck-10' 
                         }
                     }
             }
         }
+
     }
 
 }
