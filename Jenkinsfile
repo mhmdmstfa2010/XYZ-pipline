@@ -3,9 +3,10 @@ pipeline {
     tools {
         nodejs 'nodejs-22.6.0'
     }
-    environment {
-        MONGO_URI = "mongodb://127.0.0.1:27017/superData"
-    }   
+    withCredentials([usernamePassword(credentialsId: 'mongo-credintials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+    sh 'export MONGO_URI="mongodb://${USER}:${PASS}@127.0.0.1:27017/superData" && npm test'
+    }
+
     stages {
         stage('Installing dependencies') {
             steps {
