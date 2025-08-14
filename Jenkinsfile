@@ -4,15 +4,15 @@ pipeline {
         nodejs 'nodejs-22.6.0'
     }
     environment {
-        MONGO_URI = "mongodb://127.0.0.1:27017/superData"
-    }   
+        MONGO_URI = "mongodb://\${MONGO_USERNAME}:\${MONGO_PASSWORD}@127.0.0.1:27017/superData"
+    }
     stages {
         stage('Installing dependencies') {
             steps {
                 sh 'npm install --no-audit'
             }
         }
-    
+
         stage('NPM dependencies scanning') {
             parallel {
                 stage('NPM dependencies audit') {
@@ -29,20 +29,20 @@ pipeline {
                             --format ALL
                             --prettyPrint
                             --noupdate
-                        ''', odcInstallation: 'OWASP-DependencyCheck-10' 
+                        ''', odcInstallation: 'OWASP-DependencyCheck-10'
                     }
                 }
             }
         }
-        
+
         stage('Unit tests') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'mongo-credintials', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                    sh '''
-                        export MONGO_USERNAME=$MONGO_USERNAME
-                        export MONGO_PASSWORD=$MONGO_PASSWORD
-                        npm test
-                    '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'mongo-credintials',
+                    usernameVariable: 'MONGO_USERNAME',
+                    passwordVariable: 'MONGO_PASSWORD'
+                )]) {
+                    sh 'npm test'
                 }
                 junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
