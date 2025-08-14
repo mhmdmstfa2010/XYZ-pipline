@@ -18,5 +18,15 @@ pipeline {
                sh  'echo $?'           
             }
         }
+        stage('QWSAP dependencies check') {
+            steps {
+                dependencyCheck  additionalArguments: '''
+                   --scan \'./\' 
+                    --out \'./\' 
+                    --format \'ALL/\'
+                    --prettyprint''', odcInstallation: 'OWASP-DependencyCheck-10' 
+            }
+        }
     }
+
 }
