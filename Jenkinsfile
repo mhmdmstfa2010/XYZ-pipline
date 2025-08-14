@@ -7,9 +7,10 @@ pipeline {
         disableResume()
         disableConcurrentBuilds abortPrevious: true
     }
-    environment {
-        MONGO_URI = "mongodb://\${MONGO_USERNAME}:\${MONGO_PASSWORD}@127.0.0.1:27017/superData"
+   environment {
+    MONGO_URI = "mongodb://\${MONGO_USERNAME}:\${MONGO_PASSWORD}@127.0.0.1:27017/superData?authSource=admin"
     }
+
     stages {
         stage('Installing dependencies') {
             options { timestamps() }
