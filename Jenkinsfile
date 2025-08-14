@@ -38,56 +38,26 @@ pipeline {
             }
         }
 
-        stage('Setup MongoDB') {
+        stage('Setup Local MongoDB') {
             options { timestamps() }
             steps {
                 sh '''
-                    # Check if Docker is available
-                    if command -v docker &> /dev/null; then
-                        echo "Using Docker to run MongoDB..."
-                        
-                        # Stop any existing MongoDB container
-                        docker stop mongodb-test 2>/dev/null || true
-                        docker rm mongodb-test 2>/dev/null || true
-                        
-                        # Start MongoDB container
-                        docker run -d --name mongodb-test \
-                            -p 27017:27017 \
-                            -e MONGO_INITDB_ROOT_USERNAME=superuser \
-                            -e MONGO_INITDB_ROOT_PASSWORD=password \
-                            mongo:6.0
-                        
-                        # Wait for MongoDB to be ready
-                        echo "Waiting for MongoDB to be ready..."
-                        timeout 60 bash -c 'until docker exec mongodb-test mongosh --eval "db.adminCommand(\"ping\")" >/dev/null 2>&1; do sleep 2; done'
-                        
-                        echo "MongoDB is ready"
+                    # Verify MongoDB is running
+                    if pgrep mongod > /dev/null; then
+                        echo "MongoDB is running ✓"
                     else
-                        echo "Docker not available, trying system MongoDB..."
-                        # Fallback to system MongoDB installation
-                        if ! command -v mongod &> /dev/null; then
-                            echo "Installing MongoDB..."
-                            wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-                            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-                            sudo apt-get update
-                            sudo apt-get install -y mongodb-org
-                        fi
-                        
-                        # Start MongoDB service
-                        sudo systemctl start mongod || sudo service mongod start
-                        sudo systemctl enable mongod || sudo systemctl enable mongod
-                        
-                        # Wait for MongoDB to be ready
-                        sleep 10
-                        
-                        # Check if MongoDB is running
-                        if pgrep mongod > /dev/null; then
-                            echo "MongoDB is running successfully"
-                        else
-                            echo "Failed to start MongoDB"
-                            exit 1
-                        fi
+                        echo "MongoDB is not running. Please start it manually: sudo systemctl start mongod"
+                        exit 1
                     fi
+                    
+                    # Test MongoDB connection
+                    echo "Testing MongoDB connection..."
+                    timeout 10 bash -c 'until nc -z 127.0.0.1 27017; do sleep 1; done' || {
+                        echo "Cannot connect to MongoDB on port 27017"
+                        echo "Please check if MongoDB is listening on the correct port"
+                        exit 1
+                    }
+                    echo "MongoDB connection test successful ✓"
                 '''
             }
         }
@@ -102,6 +72,7 @@ pipeline {
                 )]) {
                     sh '''
                         export MONGO_URI="mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@127.0.0.1:27017/superData?authSource=admin"
+                        echo "Using MongoDB URI: $MONGO_URI"
                         npm test
                     '''
                 }
@@ -110,14 +81,4 @@ pipeline {
         }
     }
     
-    post {
-        always {
-            sh '''
-                # Cleanup MongoDB container if it exists
-                docker stop mongodb-test 2>/dev/null || true
-                docker rm mongodb-test 2>/dev/null || true
-                echo "Cleanup completed"
-            '''
-        }
-    }
 }
