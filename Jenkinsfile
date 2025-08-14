@@ -3,19 +3,26 @@ pipeline {
     tools {
         nodejs 'nodejs-22.6.0'
     }
+    environment {
+        MONGO_URI = credentials('mongo-credentials-uri')
+        NODE_ENV = 'test'
+    }
     options {
         disableResume()
         disableConcurrentBuilds abortPrevious: true
     }
-
     stages {
+        stage('Seed Database') {
+            steps {
+                sh 'node seed.js'
+            }
+        }
         stage('Installing dependencies') {
             options { timestamps() }
             steps {
                 sh 'npm install --no-audit'
             }
         }
-
         stage('NPM dependencies scanning') {
             parallel {
                 stage('NPM dependencies audit') {
@@ -37,38 +44,16 @@ pipeline {
                 }
             }
         }
-
         stage('Unit tests') {
             options { retry(2) }
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'mongo-credintials',
-                    usernameVariable: 'MONGO_USERNAME',
-                    passwordVariable: 'MONGO_PASSWORD'
-                )]) {
-                    sh '''
-                        export MONGO_URI="mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@supercluster.d83jj.mongodb.net/superData?retryWrites=true&w=majority"
-                        echo "Using MongoDB Atlas with credentials"
-                        npm test
-                    '''
-                }
+                sh 'npm test'
                 junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
         }
-        
         stage('Code coverage') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'mongo-credintials',
-                    usernameVariable: 'MONGO_USERNAME',
-                    passwordVariable: 'MONGO_PASSWORD'
-                )]) {
-                    sh '''
-                        export MONGO_URI="mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@supercluster.d83jj.mongodb.net/superData?retryWrites=true&w=majority"
-                        echo "Using MongoDB Atlas with credentials for coverage"
-                        npm run coverage
-                    '''
-                }
+                sh 'npm run coverage'
             }
         }
     }
