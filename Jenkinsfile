@@ -11,20 +11,23 @@ pipeline {
             }
         }
     
-
-        stage('NPM dependencies audit') {
-            steps {
-                sh  'npm audit --audit-level=critical'
-               sh  'echo $?'           
-            }
-        }
-        stage('QWSAP dependencies check') {
-            steps {
-                dependencyCheck  additionalArguments: '''
-                   --scan \'./\' 
-                    --out \'./\' 
-                    --format \'ALL/\'
-                    --prettyprint''', odcInstallation: 'OWASP-DependencyCheck-10' 
+        stage('NPM dependencies scanning') {
+            parallel {
+                    stage('NPM dependencies audit') {
+                        steps {
+                            sh  'npm audit --audit-level=critical'
+                        sh  'echo $?'           
+                        }
+                    }
+                    stage('OWSAP dependencies check') {
+                        steps {
+                            dependencyCheck  additionalArguments: '''
+                            --scan \'./\' 
+                                --out \'./\' 
+                                --format \'ALL/\'
+                                --prettyprint''', odcInstallation: 'OWASP-DependencyCheck-10' 
+                        }
+                    }
             }
         }
     }
