@@ -26,10 +26,17 @@ pipeline {
                             --out ./ 
                             --format ALL
                             --prettyPrint
+                            --noupdate
                         ''', odcInstallation: 'OWASP-DependencyCheck-10' 
                     }
                 }
+                stage('Unit tests') {
+                    steps {
+                        sh 'npm test'
+                    }
+                }
             }
+
         }
     }
 }
