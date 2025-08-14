@@ -9,7 +9,7 @@ pipeline {
             steps {
                 echo 'VM node version'
                 sh 'node -v'
-                sh 'npm -v'
+                
             }
         }
     }
