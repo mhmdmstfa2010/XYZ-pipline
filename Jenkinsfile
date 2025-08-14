@@ -22,7 +22,7 @@ pipeline {
             parallel {
                 stage('NPM dependencies audit') {
                     steps {
-                        sh 'npm audit --audit-level=critical'
+                        sh 'npm audit  --audit-level=critical'
                         sh 'echo $?'
                     }
                 }
