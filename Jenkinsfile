@@ -71,8 +71,8 @@ pipeline {
                     passwordVariable: 'MONGO_PASSWORD'
                 )]) {
                     sh '''
-                        export MONGO_URI="mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@127.0.0.1:27017/superData?authSource=admin"
-                        echo "Using MongoDB URI: $MONGO_URI"
+                        export MONGO_URI="mongodb://127.0.0.1:27017/superData?authSource=admin"
+                        echo "Using MongoDB URI (no inline creds): $MONGO_URI"
                         npm test
                     '''
                 }
