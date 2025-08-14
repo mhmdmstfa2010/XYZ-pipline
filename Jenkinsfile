@@ -3,6 +3,9 @@ pipeline {
     tools {
         nodejs 'nodejs-22.6.0'
     }
+    environment {
+        MONGO_URI = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
+    }
     options {
         disableResume()
         disableConcurrentBuilds abortPrevious: true
@@ -70,15 +73,21 @@ pipeline {
                     usernameVariable: 'MONGO_USERNAME',
                     passwordVariable: 'MONGO_PASSWORD'
                 )]) {
-                    sh '''
-                        export MONGO_URI="mongodb://127.0.0.1:27017/superData?authSource=admin"
-                        echo "Using MongoDB URI (no inline creds): $MONGO_URI"
-                        npm test
-                    '''
+                    sh 'npm test'
                 }
                 junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
         }
+        stage('Code coverage') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'mongo-credintials',
+                    usernameVariable: 'MONGO_USERNAME',
+                    passwordVariable: 'MONGO_PASSWORD'
+                )]) {
+                    sh 'npm run coverage'
+                }
+            }
+        }
     }
-    
 }
