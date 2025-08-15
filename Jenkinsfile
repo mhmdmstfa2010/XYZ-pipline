@@ -71,9 +71,18 @@ pipeline {
                     withSonarQubeEnv('sonarqube-server') {
                         sh """
                         ${SONAR_SCANNER_HOME}/bin/sonar-scanner
+                            -Dsonar.login=${SONAR_TOKEN}
                         """
+                        sh """
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner -X
+                        """ 
                     }
                 }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                waitForQualityGate abortPipeline: true
             }
         }
     }
