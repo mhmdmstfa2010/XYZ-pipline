@@ -6,6 +6,7 @@ pipeline {
     environment {
         MONGO_URI = credentials('mongo-credentials-uri')
         NODE_ENV = 'test'
+        SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0';
     }
     options {
         disableResume()
@@ -60,6 +61,18 @@ pipeline {
                 always {
                     junit allowEmptyResults: true, testResults: 'test-results.xml'
                 }
+            }
+        }
+        stage('Sonar-Qube') {
+            steps {
+                echo '${SONAR_SCANNER_HOME}'
+                sh'''
+                ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectKey=solar-sys \
+                    -Dsonar.sources=app.js \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.token=sqp_1c9b8197252df7cf9df71a3245ef5e9db9f939a3
+                '''
             }
         }
     }
