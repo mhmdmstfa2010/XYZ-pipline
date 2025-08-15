@@ -71,6 +71,7 @@ pipeline {
                     -Dsonar.projectKey=solar-sys \
                     -Dsonar.sources=app.js \
                     -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                     -Dsonar.token=sqp_1c9b8197252df7cf9df71a3245ef5e9db9f939a3
                 '''
             }
