@@ -6,7 +6,8 @@ pipeline {
     environment {
         MONGO_URI = credentials('mongo-credentials-uri')
         NODE_ENV = 'test'
-        SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0';
+        SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0'
+        SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
     options {
         disableResume()
@@ -38,7 +39,7 @@ pipeline {
                             --scan ./ 
                             --out ./ 
                             --format ALL
-                            --disableYarnAudit \
+                            --disableYarnAudit
                             --prettyPrint
                             --noupdate
                         ''', odcInstallation: 'OWASP-DependencyCheck-10'
@@ -54,8 +55,8 @@ pipeline {
         }
         stage('Code coverage') {
             steps {
-                catchError(buildResult: 'SUCCESS', message: 'Ooops , Errore', stageResult: 'UNSTABLE') {
-                    sh 'npm run  coverage'
+                catchError(buildResult: 'SUCCESS', message: 'Coverage generation failed', stageResult: 'UNSTABLE') {
+                    sh 'npm run coverage'
                 }
             }
             post {
@@ -64,21 +65,19 @@ pipeline {
                 }
             }
         }
-        stage('Sonar-Qube') {
+        stage('SonarQube Analysis') {
             steps {
-                    timeout(time: 60, unit: 'SECONDS') {
-                        withSonarQubeEnv('sonarqube-server')  {
-                            echo '${SONAR_SCANNER_HOME}'
-                            sh'''
-                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                                -Dsonar.projectKey=solar-sys \
-                                -Dsonar.sources=app.js \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                            '''
-                        }
-                        waitForQualityGate abortPipeline: true
+                timeout(time: 60, unit: 'SECONDS') {
+                    withSonarQubeEnv('sonarqube-server') {
+                        sh '''
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=solar-sys \
+                            -Dsonar.login=$SONAR_TOKEN
+                        '''
                     }
+                    waitForQualityGate abortPipeline: true
                 }
+            }
         }
     }
 }
