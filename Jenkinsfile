@@ -67,7 +67,7 @@ pipeline {
         stage('Sonar-Qube') {
             steps {
                     timeout(time: 60, unit: 'SECONDS') {
-                        withSonarQubeEnv(credentialsId: 'sonarqube-sever') {
+                        withSonarQubeEnv(credentialsId: 'sonarqube-server') {
                             echo '${SONAR_SCANNER_HOME}'
                             sh'''
                             ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
