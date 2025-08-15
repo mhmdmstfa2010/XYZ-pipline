@@ -48,13 +48,17 @@ pipeline {
             options { retry(2) }
             steps {
                 sh 'npm test'
-                junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
         }
         stage('Code coverage') {
             steps {
                 catchError(buildResult: 'SUCCESS', message: 'Ooops , Errore', stageResult: 'UNSTABLE') {
                     sh 'npm run  coverage'
+                }
+                post {
+                    always {
+                        junit allowEmptyResults: true, testResults: 'test-results.xml'
+                    }
                 }
             }
         }
