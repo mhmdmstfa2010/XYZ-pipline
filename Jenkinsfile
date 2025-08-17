@@ -9,6 +9,7 @@ pipeline {
     MONGO_URI = credentials('mongo-credentials-uri')
     NODE_ENV  = 'test'
     SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0'
+    DOCKERHUB_CREDENTIALS = credentials('DockerHub_cred')
   }
 
   options {
@@ -120,6 +121,18 @@ pipeline {
         }
       }
     }
+    stage('Login to Docker Hub') {
+            steps {
+                  withCredentials([usernamePassword(credentialsId: 'DockerHub_cred', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+                    script {
+                        sh '''    
+                            # Log in to Docker Hub
+                            echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                        '''
+                    }
+                }
+            }
+        }
     stage('Docker Push') {
       steps {
          withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://hub.docker.com/repositories/mohamed710') {
