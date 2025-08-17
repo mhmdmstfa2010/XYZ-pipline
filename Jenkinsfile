@@ -135,7 +135,7 @@ pipeline {
         }
     stage('Docker Push') {
       steps {
-         withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://hub.docker.com/repositories/mohamed710') {
+         withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://index.docker.io/v1/') {
           sh 'docker push mohamed710/solar-system-gitea:$GIT_COMMIT'
         }
       }
