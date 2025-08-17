@@ -81,7 +81,46 @@ pipeline {
         sh 'docker build -t mohamed710/solar-system-gitea:$GIT_COMMIT .'
       }
     }
-   
-    
+    stage('trivy scan') {
+      steps {
+        sh '''
+        trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
+        --severity LOW,MEDIUM \
+        --exit-code 0 \
+        --quiet \
+        --format json -o trivy-low-medium-report.json
+
+         trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
+        --severity CRITICAL,HIGH \
+        --exit-code 1 \
+        --quiet \
+        --format json -o trivy-critical-high-report.json
+
+        '''
+      }
+      post {
+        always {
+          sh '''
+          trivy convert\
+          --format template --template "@/usr/share/trivy/templates/html.tpl" \
+          --output trivy-medium-report.html trivy-low-medium-report.json 
+
+          trivy convert\
+          --format template --template "@/usr/share/trivy/templates/html.tpl" \
+          --output trivy-critical-report.html trivy-critical-high-report.json 
+
+          trivy convert\
+          --format template --template "@/usr/share/trivy/templates/junit.tpl" \
+          --output trivy-medium-report.xml trivy-low-medium-report.json 
+
+          trivy convert\
+          --format template --template "@/usr/share/trivy/templates/junit.tpl" \
+          --output trivy-critical-report.xml trivy-critical-high-report.json 
+          
+          '''
+        }
+      }
+    }
   }
+  
 }
