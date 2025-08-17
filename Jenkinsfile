@@ -9,7 +9,7 @@ pipeline {
     MONGO_URI = credentials('mongo-credentials-uri')
     NODE_ENV  = 'test'
     SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0'
-    DOCKER_REGISTRY_URL = 'DockerHub_url'
+    DOCKER_REGISTRY_URL = 'https://hub.docker.com/repositories/mohamed710'
   }
 
   options {
