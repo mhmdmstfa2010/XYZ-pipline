@@ -101,26 +101,16 @@ pipeline {
       post {
         always {
           sh '''
-          trivy convert\
-          --format template --template "@/usr/share/trivy/templates/html.tpl" \
-          --output trivy-medium-report.html trivy-low-medium-report.json 
-
-          trivy convert\
-          --format template --template "@/usr/share/trivy/templates/html.tpl" \
-          --output trivy-critical-report.html trivy-critical-high-report.json 
-
-          trivy convert\
-          --format template --template "@/usr/share/trivy/templates/junit.tpl" \
-          --output trivy-medium-report.xml trivy-low-medium-report.json 
-
-          trivy convert\
-          --format template --template "@/usr/share/trivy/templates/junit.tpl" \
-          --output trivy-critical-report.xml trivy-critical-high-report.json 
+          trivy convert --format template --template @./html.tpl --output trivy-medium-report.html trivy-low-medium-report.json
+          trivy convert --format template --template @./html.tpl --output trivy-critical-report.html trivy-critical-high-report.json
+          trivy convert --format template --template @./junit.tpl --output trivy-medium-report.xml trivy-low-medium-report.json
+          trivy convert --format template --template @./junit.tpl --output trivy-critical-report.xml trivy-critical-high-report.json
           
           '''
         }
       }
     }
+    
   }
   
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<testsuites name="trivy">
+    <testsuite tests="0" failures="0" name="mohamed710/solar-system-gitea:62961a6bc2e8a26ec53be66fb435fe2773f8302e (alpine 3.17.6)" errors="0" skipped="0" time="">
+        <properties>
+            <property name="type" value="alpine"></property>
+        </properties>
+    </testsuite>
+    <testsuite tests="0" failures="0" name="mohamed710/solar-system-gitea:62961a6bc2e8a26ec53be66fb435fe2773f8302e (alpine 3.17.6)" errors="0" skipped="0" time="">
+        <properties>
+            <property name="type" value="alpine"></property>
+        </properties>
+    </testsuite>
+    <testsuite tests="0" failures="0" name="Node.js" errors="0" skipped="0" time="">
+        <properties>
+            <property name="type" value="node-pkg"></property>
+        </properties>
+    </testsuite>
+    <testsuite tests="0" failures="0" name="Node.js" errors="0" skipped="0" time="">
+        <properties>
+            <property name="type" value="node-pkg"></property>
+        </properties>
+    </testsuite>
+</testsuites>
