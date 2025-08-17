@@ -130,7 +130,7 @@ pipeline {
     }
     stage('Deploy to AWS ') {
       when {
-     branch 'feature/*'
+       branch 'feature/*'
       }
       steps {
         script {
@@ -157,5 +157,18 @@ pipeline {
 
       }
     }
- }
+    stage('Integration Testing') {
+      when {
+       branch 'feature/*'
+      }
+      steps {
+        sh 'printenv | grep -i branch'
+        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+        sh '''
+          bash integration-testing.sh
+        '''
+        }
+      }
+    }
+  }
 }
