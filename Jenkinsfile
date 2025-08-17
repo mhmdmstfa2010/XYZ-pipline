@@ -146,7 +146,7 @@ pipeline {
                   sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
                   echo 'Running new container'
                   sudo docker run -d --name solar-system-gitea \
-                    -e MONGO_URI=\$MONGO_URI \
+                    -e MONGO_URI='$MONGO_URI' \
                     -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
                 "
               '''
