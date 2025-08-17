@@ -145,7 +145,7 @@ pipeline {
                   echo 'Pulling new image'
                   sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
                   echo 'Running new container'
-                  sudo docker run --name solar-system \
+                  sudo docker run --name solar-system-gitea \
                     -e MONGO_URI=\\$MONGO_URI \
                     -e MONGO_USERNAME=\\$MONGO_USERNAME \
                     -e MONGO_PASSWORD=\\$MONGO_PASSWORD \
