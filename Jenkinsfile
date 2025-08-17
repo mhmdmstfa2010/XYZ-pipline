@@ -75,7 +75,13 @@ pipeline {
         }
       }
     }
-
+    stage('Docker Build') {
+      steps {
+        sh 'printenv'
+        sh 'docker build -t mohamed710/solar-system-gitea:$GIT_COMMIT .'
+      }
+    }
+   
     
   }
 }
