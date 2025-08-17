@@ -9,7 +9,6 @@ pipeline {
     MONGO_URI = credentials('mongo-credentials-uri')
     NODE_ENV  = 'test'
     SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0'
-    DOCKER_REGISTRY_URL = 'https://hub.docker.com/repositories/mohamed710'
   }
 
   options {
@@ -123,7 +122,7 @@ pipeline {
     }
     stage('Docker Push') {
       steps {
-          withDockerRegistry(credentialsId: 'DockerHub_cred', url: DOCKER_REGISTRY_URL) {
+         withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://hub.docker.com/repositories/mohamed710') {
           sh 'docker push mohamed710/solar-system-gitea:$GIT_COMMIT'
         }
       }
