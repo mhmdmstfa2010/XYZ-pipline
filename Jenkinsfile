@@ -48,7 +48,7 @@ pipeline {
 
     stage('Unit tests') {
       options { retry(2) }
-      steps   { sh 'npm test' }
+      steps { sh 'npm test' }
     }
 
     stage('Code coverage') {
@@ -68,49 +68,57 @@ pipeline {
         timeout(time: 2, unit: 'MINUTES') {
           withSonarQubeEnv('sonarqube-server') {
             sh """
-              
               ${SONAR_SCANNER_HOME}/bin/sonar-scanner
             """
           }
         }
       }
     }
+
     stage('Docker Build') {
       steps {
         sh 'printenv'
         sh 'docker build -t mohamed710/solar-system-gitea:$GIT_COMMIT .'
       }
     }
-    stage('trivy scan') {
+
+    stage('Trivy Scan') {
       steps {
         sh '''
-        trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
-        --severity LOW,MEDIUM,HIGH \
-        --exit-code 0 \
-        --quiet \
-        --format json -o trivy-low-medium-report.json
+          trivy image mohamed710/solar-system-gitea:$GIT_COMMIT \
+            --severity LOW,MEDIUM,HIGH \
+            --exit-code 0 \
+            --quiet \
+            --format json -o trivy-low-medium-report.json
 
-         trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
-        --severity CRITICAL \
-        --exit-code 1 \
-        --quiet \
-        --format json -o trivy-critical-high-report.json
-
+          trivy image mohamed710/solar-system-gitea:$GIT_COMMIT \
+            --severity CRITICAL \
+            --exit-code 1 \
+            --quiet \
+            --format json -o trivy-critical-high-report.json
         '''
       }
       post {
         always {
           sh '''
-          trivy convert --format template --template @./html.tpl --output trivy-medium-report.html trivy-low-medium-report.json
-          trivy convert --format template --template @./html.tpl --output trivy-critical-report.html trivy-critical-high-report.json
-          trivy convert --format template --template @./junit.tpl --output trivy-medium-report.xml trivy-low-medium-report.json
-          trivy convert --format template --template @./junit.tpl --output trivy-critical-report.xml trivy-critical-high-report.json
-          
+            # Copy templates to workspace to avoid permission issues
+            sudo cp /usr/local/share/trivy/templates/html.tpl .
+            sudo cp /usr/local/share/trivy/templates/junit.tpl .
+            chmod 644 html.tpl junit.tpl
+
+            # Verify JSON files exist
+            ls -l trivy-low-medium-report.json trivy-critical-high-report.json
+
+            # Convert commands using local templates
+            trivy convert --format template --template @./html.tpl --output trivy-medium-report.html trivy-low-medium-report.json
+            trivy convert --format template --template @./html.tpl --output trivy-critical-report.html trivy-critical-high-report.json
+            trivy convert --format template --template @./junit.tpl --output trivy-medium-report.xml trivy-low-medium-report.json
+            trivy convert --format template --template @./junit.tpl --output trivy-critical-report.xml trivy-critical-high-report.json
           '''
+          // Archive the generated reports
+          archiveArtifacts artifacts: 'trivy-medium-report.html,trivy-critical-report.html,trivy-medium-report.xml,trivy-critical-report.xml', allowEmptyArchive: true
         }
       }
     }
-    
   }
-  
 }
