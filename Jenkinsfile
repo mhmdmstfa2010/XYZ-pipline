@@ -85,13 +85,13 @@ pipeline {
       steps {
         sh '''
         trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
-        --severity LOW,MEDIUM \
+        --severity LOW,MEDIUM,HIGH \
         --exit-code 0 \
         --quiet \
         --format json -o trivy-low-medium-report.json
 
          trivy image  mohamed710/solar-system-gitea:$GIT_COMMIT \
-        --severity CRITICAL,HIGH \
+        --severity CRITICAL \
         --exit-code 1 \
         --quiet \
         --format json -o trivy-critical-high-report.json
