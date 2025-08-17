@@ -68,6 +68,7 @@ pipeline {
         timeout(time: 2, unit: 'MINUTES') {
           withSonarQubeEnv('sonarqube-server') {
             sh """
+              
               ${SONAR_SCANNER_HOME}/bin/sonar-scanner
             """
           }
