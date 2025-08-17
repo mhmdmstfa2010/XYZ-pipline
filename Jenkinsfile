@@ -120,19 +120,7 @@ pipeline {
           archiveArtifacts artifacts: 'trivy-medium-report.html,trivy-critical-report.html,trivy-medium-report.xml,trivy-critical-report.xml', allowEmptyArchive: true
         }
       }
-    }
-    stage('Login to Docker Hub') {
-            steps {
-                  withCredentials([usernamePassword(credentialsId: 'DockerHub_cred', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
-                    script {
-                        sh '''    
-                            # Log in to Docker Hub
-                            echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                        '''
-                    }
-                }
-            }
-        }
+    } 
     stage('Docker Push') {
       steps {
          withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://index.docker.io/v1/') {
@@ -140,5 +128,33 @@ pipeline {
         }
       }
     }
+    stage('Deploy to AWS ') {
+      when {
+     branch 'feature/*'
+      }
+      steps {
+        script {
+            sshagent(['AWS_SSH']) {
+              sh '''
+                ssh -o StrictHostKeyChecking=no ec2-user@34.207.247.32 "
+                if sudo docker ps -a | grep -q solar-system-gitea; then
+                echo "Stopping and removing existing container"
+                  sudo docker stop solar-system-gitea
+                  sudo docker rm solar-system-gitea
+                fi
+                echo "Pulling new image"
+                sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
+                echo "Running new container"
+                sudo docker run --name solar-system \
+                -e MONGO_URI=$MONGO_URI \
+                -e MONGO_USERNAME=$MONGO_USERNAME \
+                -e MONGO_PASSWORD=$MONGO_PASSWORD \
+                -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
+                "
+              '''
+        }
+      }
+    }
   }
+ }
 }
