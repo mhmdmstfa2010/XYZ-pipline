@@ -137,24 +137,25 @@ pipeline {
             sshagent(['AWS_SSH']) {
               sh '''
                 ssh -o StrictHostKeyChecking=no ec2-user@34.207.247.32 "
-                if sudo docker ps -a | grep -q solar-system-gitea; then
-                echo "Stopping and removing existing container"
-                  sudo docker stop solar-system-gitea
-                  sudo docker rm solar-system-gitea
-                fi
-                echo "Pulling new image"
-                sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
-                echo "Running new container"
-                sudo docker run --name solar-system \
-                -e MONGO_URI=$MONGO_URI \
-                -e MONGO_USERNAME=$MONGO_USERNAME \
-                -e MONGO_PASSWORD=$MONGO_PASSWORD \
-                -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
+                  if sudo docker ps -a | grep -q solar-system-gitea; then
+                    echo 'Stopping and removing existing container'
+                    sudo docker stop solar-system-gitea
+                    sudo docker rm solar-system-gitea
+                  fi
+                  echo 'Pulling new image'
+                  sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
+                  echo 'Running new container'
+                  sudo docker run --name solar-system \
+                    -e MONGO_URI=\\$MONGO_URI \
+                    -e MONGO_USERNAME=\\$MONGO_USERNAME \
+                    -e MONGO_PASSWORD=\\$MONGO_PASSWORD \
+                    -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
                 "
               '''
-        }
+            }
+          }
+
       }
     }
-  }
  }
 }
