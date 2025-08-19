@@ -84,6 +84,7 @@ pipeline {
       }
     }
 
+    
     stage('Trivy Scan') {
       steps {
         sh '''
