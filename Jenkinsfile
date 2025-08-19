@@ -136,7 +136,7 @@ pipeline {
         script {
             sshagent(['AWS_SSH']) {
               sh '''
-                ssh -o StrictHostKeyChecking=no ec2-user@34.207.247.32 "
+                ssh -o StrictHostKeyChecking=no ec2-user@54.80.223.174 "
                   if sudo docker ps -a | grep -q solar-system-gitea; then
                     echo 'Stopping and removing existing container'
                     sudo docker stop solar-system-gitea

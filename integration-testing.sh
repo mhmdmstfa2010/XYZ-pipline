@@ -8,7 +8,7 @@ Data=$(aws ec2 describe-instances)
 echo "Data = $Data"
 
 # Extract instance URL (public DNS or IP depending on tag dev-deploy)
-URL=$(aws ec2 describe-instances | jq -r '.Reservations[].Instances[] | select(.Tags[].Value == "Jenkins_CD") | .PublicDnsName')
+URL=$(aws ec2 describe-instances | jq -r '.Reservations[].Instances[] | select(.Tags[].Value == "jenlins") | .PublicDnsName')
 echo "URL Data = $URL"
 
 if [[ "$URL" != '' ]]; then
