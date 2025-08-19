@@ -26,6 +26,7 @@ pipeline {
     stage('Seed Database') {
       steps { sh 'node seed.js' }
     }
+
     stage('NPM dependencies scanning') {
       parallel {
         stage('NPM dependencies audit') {
