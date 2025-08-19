@@ -19,15 +19,13 @@ pipeline {
   }
 
   stages {
-    stage('Seed Database') {
-      steps { sh 'node seed.js' }
-    }
-
     stage('Installing dependencies') {
       options { timestamps() }
       steps { sh 'npm install --no-audit' }
     }
-
+    stage('Seed Database') {
+      steps { sh 'node seed.js' }
+    }
     stage('NPM dependencies scanning') {
       parallel {
         stage('NPM dependencies audit') {
