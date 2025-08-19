@@ -19,12 +19,10 @@ pipeline {
   }
 
   stages {
-    
     stage('Installing dependencies') {
       options { timestamps() }
       steps { sh 'npm install --no-audit' }
     }
-
     stage('Seed Database') {
       steps { sh 'node seed.js' }
     }
