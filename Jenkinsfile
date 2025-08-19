@@ -180,7 +180,7 @@ pipeline {
             git checkout main
             git checkout -b feature-$BUILD_ID
             sed -i "s#mohamed710.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yml
-            cat deployment.yaml
+            cat deployment.yml
 
 
             
