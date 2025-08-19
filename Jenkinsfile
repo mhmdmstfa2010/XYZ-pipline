@@ -198,19 +198,17 @@ pipeline {
        branch 'PR*'
       }
       steps {
-        sh '''
-         curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -d "{
-              \"title\": \"Update solar-system-gitea image to $GIT_COMMIT\",
-              \"body\": \"Update docker image to $GIT_COMMIT\",
-              \"head\": \"feature-$BUILD_ID\",
-              \"base\": \"main\"
-            }"
-
-
-        '''
+       sh """
+            curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -d '{
+                "title": "Update solar-system-gitea image to ${GIT_COMMIT}",
+                "body": "Update docker image to ${GIT_COMMIT}",
+                "head": "feature-${BUILD_ID}",
+                "base": "main"
+              }'
+          """
       }
     }
   }
