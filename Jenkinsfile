@@ -19,6 +19,7 @@ pipeline {
   }
 
   stages {
+
     stage('Installing dependencies') {
       options { timestamps() }
       steps { sh 'npm install --no-audit' }
@@ -178,7 +179,7 @@ pipeline {
           sh '''
             git checkout main
             git checkout -b feature-$BUILD_ID
-            sed -i "s#mohamed710.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yaml
+            sed -i "s#mohamed710.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yml
             cat deployment.yaml
 
 
