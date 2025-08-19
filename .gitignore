@@ -4,3 +4,12 @@ solar-system.png
 .talismanrc
 coverage
 test-results.xml
+.env
+trivy-low-medium-report.json
+trivy-critical-high-report.json
+trivy-medium-report.html
+trivy-critical-report.html
+trivy-medium-report.xml
+trivy-critical-report.xml
+html.tpl
+junit.tpl
