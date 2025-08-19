@@ -18,7 +18,6 @@ pipeline {
     disableConcurrentBuilds abortPrevious: true
   }
 
-
   stages {
 
     stage('Installing dependencies') {
