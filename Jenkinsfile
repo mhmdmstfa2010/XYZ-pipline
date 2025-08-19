@@ -199,7 +199,7 @@ pipeline {
       }
       steps {
         sh '''
-          curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
+         curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $GITHUB_TOKEN" \
             -d "{
@@ -208,6 +208,7 @@ pipeline {
               \"head\": \"feature-$BUILD_ID\",
               \"base\": \"main\"
             }"
+
 
         '''
       }
