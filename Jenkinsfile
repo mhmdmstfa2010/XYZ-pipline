@@ -181,9 +181,7 @@ pipeline {
             git checkout -b feature-$BUILD_ID
             sed -i "s#mohamed710.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yml
             cat deployment.yml
-
-
-            
+            # add the sealed secrets to the gitops repo
             git config --global user.email "jenkins@solar-system.com"
             git config --global user.name "Jenkins"
             git remote set-url origin https://${GITHUB_TOKEN}@github.com/mhmdmstfa2010/solar-system-gitops.git
