@@ -10,6 +10,7 @@ pipeline {
     NODE_ENV  = 'test'
     SONAR_SCANNER_HOME = tool 'sonarQube-scanner-6.1.0'
     DOCKERHUB_CREDENTIALS = credentials('DockerHub_cred')
+    GITHUB_TOKEN = credentials('github-token')
   }
 
   options {
@@ -165,6 +166,40 @@ pipeline {
         sh '''
           bash integration-testing.sh
         '''
+        }
+      }
+    }
+    stage('Kubernetes Deploy') {
+      when {
+       branch 'pr*'
+      }
+      steps {
+        sh ' git clone -b main https://github.com/mhmdmstfa2010/solar-system-gitops.git'
+        dir('solar-system-gitops') {
+          sh '''
+            git checkout main
+            git checkout -b feature-$BUILD_ID
+            sed -i "s#mohamed710.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yaml
+            cat deployment.yaml
+
+
+            
+            git config --global user.email "jenkins@solar-system.com"
+            git config --global user.name "Jenkins"
+            git remote set-url origin https://${GITHUB_TOKEN}@github.com/mhmdmstfa2010/solar-system-gitops.git
+            git add .
+            git commit -m "Update solar-system-gitea image to $GIT_COMMIT"
+            git push origin feature-$BUILD_ID
+          '''
+        }
+      }
+    }
+  }
+  post {
+    always {
+      script {
+        if (fileExists('solar-system-gitops')) {
+          sh 'rm -rf solar-system-gitops'
         }
       }
     }
