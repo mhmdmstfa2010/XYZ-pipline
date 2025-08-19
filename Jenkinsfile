@@ -199,19 +199,16 @@ pipeline {
       }
       steps {
         sh '''
-          curl -X POST \
-          'https://api.github.com/api/v1/repos/mhmdmstfa2010/solar-system-gitops/pulls' \
-          -H "Accept: application/json" \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          -H "Content-Type: application/json" \
-          -d '{
-              "assignee": "mhmdmstfa2010",
-              "assignees": ["mhmdmstfa2010"],
-              "base": "main",
-              "body": "Update docker image to $GIT_COMMIT",
-              "head": "feature-$BUILD_ID",  
-              "title": "Update solar-system-gitea image to $GIT_COMMIT"
-          }'
+          curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d "{
+              \"title\": \"Update solar-system-gitea image to $GIT_COMMIT\",
+              \"body\": \"Update docker image to $GIT_COMMIT\",
+              \"head\": \"feature-$BUILD_ID\",
+              \"base\": \"main\"
+            }"
+
         '''
       }
     }
