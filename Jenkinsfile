@@ -229,12 +229,13 @@ pipeline {
         sh '''
         chmod 777 $(pwd)
         docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
-        -t http://localhost:3000/api-docs \
+        -t http://192.168.49.2:32135/api-docs \
         -f openapi \
         -r zap-report.html \
         -J zap-report.json \
         -X zap-report.xml \
         -W zap-report.md 
+        #### -c zap_ignore_rules
         '''
       }
     }
@@ -247,6 +248,14 @@ pipeline {
           sh 'rm -rf solar-system-gitops'
         }
       }
+  //    publishHTML target: ([
+        allowMissing: true,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: './',
+        reportFiles: 'zap-report.html',
+        reportName: 'ZAP Report',
+        useWrapperFileDirectory: true])
     }
   }
 }
