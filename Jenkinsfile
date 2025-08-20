@@ -211,6 +211,34 @@ pipeline {
           """
       }
     }
+    stage('APP deployed?') {
+      when {
+       branch 'PR*'
+      }
+      steps {
+        timeout(time: 1, unit: 'DAYS') {
+         input message: 'Is the app deployed?', ok: 'Yes'
+        }
+      }
+    }
+    stage('DAST Scan') {
+      when {
+       branch 'PR*'
+      }
+      steps {
+        sh '''
+        chmod 777 $(pwd)
+        docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
+        -t http://localhost:3000/api-docs \
+        -f openapi \
+        -r zap-report.html \
+        -J zap-report.json \
+        -X zap-report.xml \
+        -W zap-report.md 
+        '''
+      }
+    }
+
   }
   post {
     always {
