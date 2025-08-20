@@ -249,13 +249,13 @@ pipeline {
         }
       }
   //    publishHTML target: ([
-        allowMissing: true,
-        alwaysLinkToLastBuild: true,
-        keepAll: true,
-        reportDir: './',
-        reportFiles: 'zap-report.html',
-        reportName: 'ZAP Report',
-        useWrapperFileDirectory: true])
+       // allowMissing: true,
+        //alwaysLinkToLastBuild: true,
+        //keepAll: true,
+        //reportDir: './',
+        //reportFiles: 'zap-report.html',
+        //reportName: 'ZAP Report',
+        //useWrapperFileDirectory: true])
     }
   }
 }
