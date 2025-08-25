@@ -130,6 +130,7 @@ pipeline {
         }
       }
     }
+    
     stage('Deploy to AWS ') {
       when {
        branch 'feature/*'
@@ -138,7 +139,7 @@ pipeline {
         script {
             sshagent(['AWS_SSH']) {
               sh '''
-                ssh -o StrictHostKeyChecking=no ec2-user@54.80.223.174 "
+                ssh -o StrictHostKeyChecking=no ec2-user@54.242.25.204 "
                   if sudo docker ps -a | grep -q solar-system-gitea; then
                     echo 'Stopping and removing existing container'
                     sudo docker stop solar-system-gitea
@@ -172,7 +173,7 @@ pipeline {
     }
     stage('Kubernetes Deploy') {
       when {
-       branch 'pr*'
+       branch 'PR*'
       }
       steps {
         sh ' git clone -b main https://github.com/mhmdmstfa2010/solar-system-gitops.git'
@@ -193,6 +194,53 @@ pipeline {
         }
       }
     }
+    stage('k8s-raise-PR') {
+      when {
+       branch 'PR*'
+      }
+      steps {
+       sh """
+            curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -d '{
+                "title": "Update solar-system-gitea image to ${GIT_COMMIT}",
+                "body": "Update docker image to ${GIT_COMMIT}",
+                "head": "feature-${BUILD_ID}",
+                "base": "main"
+              }'
+          """
+      }
+    }
+    stage('APP deployed?') {
+      when {
+       branch 'PR*'
+      }
+      steps {
+        timeout(time: 1, unit: 'DAYS') {
+         input message: 'Is the app deployed?', ok: 'Yes'
+        }
+      }
+    }
+    stage('DAST Scan') {
+      when {
+       branch 'PR*'
+      }
+      steps {
+        sh '''
+        chmod 777 $(pwd)
+        docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
+        -t http://192.168.49.2:32134/api-docs \
+        -f openapi \
+        -r zap-report.html \
+        -J zap-report.json \
+        -x zap-report.xml \
+        -w zap-report.md 
+        #### -c zap_ignore_rules
+        '''
+      }
+    }
+
   }
   post {
     always {
@@ -201,6 +249,14 @@ pipeline {
           sh 'rm -rf solar-system-gitops'
         }
       }
+  //    publishHTML target: ([
+       // allowMissing: true,
+        //alwaysLinkToLastBuild: true,
+        //keepAll: true,
+        //reportDir: './',
+        //reportFiles: 'zap-report.html',
+        //reportName: 'ZAP Report',
+        //useWrapperFileDirectory: true])
     }
   }
 }
