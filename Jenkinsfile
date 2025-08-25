@@ -229,7 +229,7 @@ pipeline {
         sh '''
         chmod 777 $(pwd)
         docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
-        -t http://192.168.49.2:32135/api-docs \
+        -t http://192.168.49.2:30425/api-docs \
         -f openapi \
         -r zap-report.html \
         -J zap-report.json \
