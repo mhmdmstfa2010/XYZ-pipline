@@ -233,7 +233,7 @@ pipeline {
         -f openapi \
         -r zap-report.html \
         -J zap-report.json \
-        -X zap-report.xml \
+        -x zap-report.xml \
         -W zap-report.md 
         #### -c zap_ignore_rules
         '''
