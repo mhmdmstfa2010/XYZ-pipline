@@ -266,14 +266,22 @@ pipeline {
     stage('lambda invoke function') {
       when { branch 'main' }
       steps {
-       withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
-          sh '''
-            sleep 30
-            function_url_data=$(aws lambda get-function-url-config --function-name solar-system)
-            function_url=$(echo $function_url_data | jq -r '.FunctionUrl | sub("/$"; "")')
-            curl -Is $function_url/live | grep -i " 200 OK "
-          '''
+      withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+            sh '''
+              sleep 30
+              function_url_data=$(aws lambda get-function-url-config --function-name solar-system)
+              function_url=$(echo "$function_url_data" | jq -r '.FunctionUrl | sub("/$"; "")')
+              status_code=$(curl -s -o /dev/null -w "%{http_code}" $function_url/live)
+              echo "Lambda /live HTTP status: $status_code"
+              if [ "$status_code" -eq 200 ]; then
+                echo "Lambda /live endpoint is OK"
+              else
+                echo "Lambda /live endpoint NOT OK"
+                exit 1
+              fi
+            '''
           }
+
         }
       }
     }
