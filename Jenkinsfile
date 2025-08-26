@@ -260,7 +260,7 @@ pipeline {
         }
       }
     }
-    stage('Doploy to prod') {
+    stage('Deploy to prod') {
       when {
        branch 'main'
       }
@@ -271,6 +271,8 @@ pipeline {
 
         
       }
+  
+  }
   }
   post {
     always {
@@ -289,5 +291,5 @@ pipeline {
         //useWrapperFileDirectory: true])
        }
     }
-  } 
+   
 }
