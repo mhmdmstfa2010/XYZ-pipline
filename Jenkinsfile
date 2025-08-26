@@ -261,7 +261,7 @@ pipeline {
         }
       }
     }
-    stage('Deploy to prod') {
+    stage('Deploy to prod?') {
       when {
        branch 'main'
       }
@@ -274,6 +274,37 @@ pipeline {
       }
   
   }
+    stage( 'lambda deploy') {
+      when {
+       branch 'main'
+      }
+      steps {
+        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+          sh '''
+            tail -5 app.js
+            echo "***********************"
+            sed -i "s/^app\.listen(3000\/ s/.*/app.js"
+            sed -i "s/module.exports = app;/\\\\/module.exports = app;/g" app.js
+            sed -i "s/^module.exports.handler/module.exports.handler/" app.js
+            echo "***********************"
+            tail -5 app.js
+        '''
+        sh '''
+            zip -qr solar-system-lambda-$BUILD_ID.zip app* package* index.html node*
+            ls -ltr solar-system-lambda-$BUILD_ID.zip
+        '''
+        s3Upload(
+            file: "solar-system-lambda-${BUILD_ID}.zip",
+            bucket: 'solar-sys-lambda-bucket'
+        )
+        sh '''
+            aws lambda update-function-code \
+            --function-name solar-system \
+            --s3-bucket solar-sys-lambda-bucket \
+            --s3-key solar-system-lambda-$BUILD_ID.zip
+        '''
+        }
+      }
   }
   post {
     always {
