@@ -274,38 +274,53 @@ pipeline {
       }
   
   }
-    stage( 'lambda deploy') {
-      when {
-       branch 'main'
-      }
-      steps {
-        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
-          sh '''
-            tail -5 app.js
-            echo "***********************"
-            sed -i "s/^app\.listen(3000\/ s/.*/app.js"
-            sed -i "s/module.exports = app;/\\\\/module.exports = app;/g" app.js
-            sed -i "s/^module.exports.handler/module.exports.handler/" app.js
-            echo "***********************"
-            tail -5 app.js
-        '''
-        sh '''
-            zip -qr solar-system-lambda-$BUILD_ID.zip app* package* index.html node*
-            ls -ltr solar-system-lambda-$BUILD_ID.zip
-        '''
-        s3Upload(
-            file: "solar-system-lambda-${BUILD_ID}.zip",
-            bucket: 'solar-sys-lambda-bucket'
-        )
-        sh '''
-            aws lambda update-function-code \
-            --function-name solar-system \
-            --s3-bucket solar-sys-lambda-bucket \
-            --s3-key solar-system-lambda-$BUILD_ID.zip
-        '''
-        }
-      }
+   stage('lambda deploy') {
+  when {
+    branch 'main'
   }
+  steps {
+    withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+      // Show last 5 lines before modification
+      sh 'tail -5 app.js'
+
+      // Modify app.js for Lambda deployment
+      sh '''
+      # Comment any line starting with app.listen(3000
+      sed -i "s/^app\\.listen(3000.*)/\\/\\/ &/" app.js
+
+      # Comment module.exports = app; if present
+      sed -i "s/^module\\.exports = app;/\\/\\/ &/" app.js
+
+      # Ensure module.exports.handler is active
+      sed -i "s/^\\/\\/ module\\.exports.handler/module.exports.handler/" app.js
+
+      echo "***********************"
+      tail -5 app.js
+      '''
+
+      // Prepare ZIP for S3 upload
+      sh '''
+      zip -qr solar-system-lambda-$BUILD_ID.zip app* package* index.html node*
+      ls -ltr solar-system-lambda-$BUILD_ID.zip
+      '''
+
+      // Upload ZIP to S3
+      s3Upload(
+        file: "solar-system-lambda-${BUILD_ID}.zip",
+        bucket: 'solar-sys-lambda-bucket'
+      )
+
+      // Update Lambda function code
+      sh '''
+      aws lambda update-function-code \
+        --function-name solar-system \
+        --s3-bucket solar-sys-lambda-bucket \
+        --s3-key solar-system-lambda-$BUILD_ID.zip
+      '''
+    }
+  }
+}
+
   post {
     always {
       script {
