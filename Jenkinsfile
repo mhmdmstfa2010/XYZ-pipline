@@ -221,25 +221,45 @@ pipeline {
         }
       }
     }
-    stage('DAST Scan') {
-      when {
+    // stage('DAST Scan') {
+      // when {
+      //  branch 'PR*'
+      // }
+      // steps {
+      //  sh '''
+      //  chmod 777 $(pwd)
+      //  docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
+      //  -t http://192.168.49.2:32134/api-docs \
+      //  -f openapi \
+      //  -r zap-report.html \
+      //  -J zap-report.json \
+      //  -x zap-report.xml \
+      //  -w zap-report.md 
+      //  #### -c zap_ignore_rules
+      //  '''
+      // }
+    // }
+
+    stage('uploud DAST Scan to s3') {
+     when {
        branch 'PR*'
-      }
+     }
       steps {
+        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
         sh '''
-        chmod 777 $(pwd)
-        docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
-        -t http://192.168.49.2:32134/api-docs \
-        -f openapi \
-        -r zap-report.html \
-        -J zap-report.json \
-        -x zap-report.xml \
-        -w zap-report.md 
-        #### -c zap_ignore_rules
+         mkdir reports-${BUILD_ID}
+         cp -rf coverage/ reports-${BUILD_ID}
+         cp dependency*.*  test-results.xml trivy*.* zap*.* reports-${BUILD_ID}
+         ls -ltr reports-${BUILD_ID}
         '''
+        s3Upload(
+          bucket: 'solar-system-reports-jenkis-pip',
+          path: "jenkins-${BUILD_ID}/",
+          file: "reports-${BUILD_ID}"
+        )
+        }
       }
     }
-
   }
   post {
     always {
