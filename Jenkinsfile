@@ -266,13 +266,14 @@ pipeline {
     stage('lambda invoke function') {
       when { branch 'main' }
       steps {
-        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+       withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
           sh '''
             sleep 30
-            funtion_url_data=$(aws lambda get-function-url-config --function-name solar-system ')
-            function_url=$(echo $funtion_url_data | jq -r '.FunctionUrl | sub("/$"; "")')
+            function_url_data=$(aws lambda get-function-url-config --function-name solar-system)
+            function_url=$(echo $function_url_data | jq -r '.FunctionUrl | sub("/$"; "")')
             curl -Is $function_url/live | grep -i " 200 OK "
           '''
+          }
         }
       }
     }
