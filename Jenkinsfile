@@ -260,6 +260,17 @@ pipeline {
         }
       }
     }
+    stage('Doploy to prod') {
+      when {
+       branch 'main'
+      }
+      steps {
+        timeout(time: 1, unit: 'DAYS') {
+          input message: 'Doployed to prod?', ok: 'Yes', submitter: 'admin'
+        }
+        
+        
+      }
   }
   post {
     always {
