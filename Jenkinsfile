@@ -204,7 +204,21 @@ pipeline {
         }
       }
     }
-
+    stage('DAST Scan') {
+        when { branch 'PR*' }
+        steps {
+          sh '''
+            chmod 777 $(pwd)
+            docker run -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
+            -t http://192.168.49.2:32134/api-docs \
+            -f openapi \
+            -r zap-report.html \
+            -J zap-report.json \
+            -x zap-report.xml \
+            -w zap-report.md
+          '''
+        }
+    }
     stage('uploud DAST Scan to s3') {
       when { branch 'PR*' }
       steps {
@@ -284,12 +298,11 @@ pipeline {
 
         }
       }
-    }
-
-   // end of stages
+    } // end of stages
 
   post {
     always {
+           echo "DAST Scan finished, reports are in zap-report.* files"
       script {
         if (fileExists('solar-system-gitops')) {
           sh 'rm -rf solar-system-gitops'
