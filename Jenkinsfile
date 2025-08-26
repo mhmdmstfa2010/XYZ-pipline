@@ -278,7 +278,7 @@ pipeline {
       }
     }
 
-  } // end of stages
+   // end of stages
 
   post {
     always {
