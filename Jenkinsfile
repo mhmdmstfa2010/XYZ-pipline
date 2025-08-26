@@ -268,7 +268,7 @@ pipeline {
         timeout(time: 1, unit: 'DAYS') {
           input message: 'Doployed to prod?', ok: 'Yes', submitter: 'admin'
         }
-        
+
         
       }
   }
@@ -279,7 +279,7 @@ pipeline {
           sh 'rm -rf solar-system-gitops'
         }
       }
-  //    publishHTML target: ([
+       //publishHTML target: ([
        // allowMissing: true,
         //alwaysLinkToLastBuild: true,
         //keepAll: true,
@@ -287,6 +287,7 @@ pipeline {
         //reportFiles: 'zap-report.html',
         //reportName: 'ZAP Report',
         //useWrapperFileDirectory: true])
+       }
     }
-  }
+  } 
 }
