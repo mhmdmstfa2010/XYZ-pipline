@@ -299,16 +299,22 @@ pipeline {
         }
       }
     } // end of stages
-
-  post {
+ post {
+    success {
+        slackSend channel: '#general', message: "✅ Pipeline succeeded for Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' \nURL: ${env.BUILD_URL}"
+    }
+    failure {
+        slackSend channel: '#general', message: "❌ Pipeline failed for Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' \nURL: ${env.BUILD_URL}"
+    }
     always {
-           echo "DAST Scan finished, reports are in zap-report.* files"
-      script {
-        if (fileExists('solar-system-gitops')) {
-          sh 'rm -rf solar-system-gitops'
+        echo "DAST Scan finished, reports are in zap-report.* files"
+        script {
+            if (fileExists('solar-system-gitops')) {
+                sh 'rm -rf solar-system-gitops'
+            }
         }
-      }
     }
   }
+ 
+}
 
-} 
