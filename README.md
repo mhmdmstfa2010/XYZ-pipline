@@ -12,13 +12,13 @@
 ## 📸 Screenshots
 
 ### Application UI
-![Solar System App Interface](pics/Screenshot from 2025-08-27 08-19-06.png)
+![Solar System App Interface](https://github.com/mhmdmstfa2010/XYZ-pipline/blob/main/pics/Screenshot%20from%202025-08-27%2008-19-06.png?raw=true)
 ![Solar System App Interface](https://github.com/mhmdmstfa2010/XYZ-pipline/blob/main/pics/Screenshot%20from%202025-08-27%2008-20-25.png?raw=true)
 
 ### Jenkins Pipeline Dashboard
-![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-16-40.png)
-![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-14-56.png)
-![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-15-14.png)
+![Jenkins Pipeline](https://github.com/mhmdmstfa2010/XYZ-pipline/blob/main/pics/Screenshot%20from%202025-08-27%2008-16-40.png?raw=true)
+![Jenkins Pipeline](https://github.com/mhmdmstfa2010/XYZ-pipline/blob/main/pics/Screenshot%20from%202025-08-27%2008-15-14.png?raw=true)
+![Jenkins Pipeline](https://github.com/mhmdmstfa2010/XYZ-pipline/blob/main/pics/Screenshot%20from%202025-08-27%2008-14-56.png?raw=true)
 
 ---
 
