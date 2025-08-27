@@ -24,6 +24,7 @@ pipeline {
       options { timestamps() }
       steps { sh 'npm install --no-audit' }
     }
+
     stage('Seed Database') {
       steps { sh 'node seed.js' }
     }
@@ -69,9 +70,7 @@ pipeline {
       steps {
         timeout(time: 2, unit: 'MINUTES') {
           withSonarQubeEnv('sonarqube-server') {
-            sh """
-              ${SONAR_SCANNER_HOME}/bin/sonar-scanner
-            """
+            sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner"
           }
         }
       }
@@ -103,86 +102,72 @@ pipeline {
       post {
         always {
           sh '''
-            # Copy templates to workspace to avoid permission issues
             sudo cp /usr/local/share/trivy/templates/html.tpl .
             sudo cp /usr/local/share/trivy/templates/junit.tpl .
             chmod 644 html.tpl junit.tpl
 
-            # Verify JSON files exist
             ls -l trivy-low-medium-report.json trivy-critical-high-report.json
 
-            # Convert commands using local templates
             trivy convert --format template --template @./html.tpl --output trivy-medium-report.html trivy-low-medium-report.json
             trivy convert --format template --template @./html.tpl --output trivy-critical-report.html trivy-critical-high-report.json
             trivy convert --format template --template @./junit.tpl --output trivy-medium-report.xml trivy-low-medium-report.json
             trivy convert --format template --template @./junit.tpl --output trivy-critical-report.xml trivy-critical-high-report.json
           '''
-          // Archive the generated reports
           archiveArtifacts artifacts: 'trivy-medium-report.html,trivy-critical-report.html,trivy-medium-report.xml,trivy-critical-report.xml', allowEmptyArchive: true
         }
       }
     } 
+
     stage('Docker Push') {
       steps {
-         withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://index.docker.io/v1/') {
+        withDockerRegistry(credentialsId: 'DockerHub_cred', url: 'https://index.docker.io/v1/') {
           sh 'docker push mohamed710/solar-system-gitea:$GIT_COMMIT'
         }
       }
     }
-    
-    stage('Deploy to AWS ') {
-      when {
-       branch 'feature/*'
-      }
+
+    stage('Deploy to AWS') {
+      when { branch 'feature/*' }
       steps {
         script {
-            sshagent(['AWS_SSH']) {
-              sh '''
-                ssh -o StrictHostKeyChecking=no ec2-user@54.242.25.204 "
-                  if sudo docker ps -a | grep -q solar-system-gitea; then
-                    echo 'Stopping and removing existing container'
-                    sudo docker stop solar-system-gitea
-                    sudo docker rm solar-system-gitea
-                  fi
-                  echo 'Pulling new image'
-                  sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
-                  echo 'Running new container'
-                  sudo docker run -d --name solar-system-gitea \
-                    -e MONGO_URI='$MONGO_URI' \
-                    -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
-                "
-              '''
-            }
+          sshagent(['AWS_SSH']) {
+            sh '''
+              ssh -o StrictHostKeyChecking=no ec2-user@54.242.25.204 "
+                if sudo docker ps -a | grep -q solar-system-gitea; then
+                  echo 'Stopping and removing existing container'
+                  sudo docker stop solar-system-gitea
+                  sudo docker rm solar-system-gitea
+                fi
+                echo 'Pulling new image'
+                sudo docker pull mohamed710/solar-system-gitea:$GIT_COMMIT
+                echo 'Running new container'
+                sudo docker run -d --name solar-system-gitea -e MONGO_URI='$MONGO_URI' -p 3000:3000 mohamed710/solar-system-gitea:$GIT_COMMIT
+              "
+            '''
           }
-
-      }
-    }
-    stage('Integration Testing') {
-      when {
-       branch 'feature/*'
-      }
-      steps {
-        sh 'printenv | grep -i branch'
-        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
-        sh '''
-          bash integration-testing.sh
-        '''
         }
       }
     }
-    stage('Kubernetes Deploy') {
-      when {
-       branch 'PR*'
-      }
+
+    stage('Integration Testing') {
+      when { branch 'feature/*' }
       steps {
-        sh ' git clone -b main https://github.com/mhmdmstfa2010/solar-system-gitops.git'
+        sh 'printenv | grep -i branch'
+        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+          sh 'bash integration-testing.sh'
+        }
+      }
+    }
+
+    stage('Kubernetes Deploy') {
+      when { branch 'PR*' }
+      steps {
+        sh 'git clone -b main https://github.com/mhmdmstfa2010/solar-system-gitops.git'
         dir('solar-system-gitops') {
           sh '''
             git checkout main
             git checkout -b feature-$BUILD_ID
             sed -i "s#mohamed710/solar-system-gitea.*#mohamed710/solar-system-gitea:$GIT_COMMIT#g" deployment.yml
-            cat deployment.yml
-            #### add the sealed secrets to the gitops repo
             git config --global user.email "jenkins@solar-system.com"
             git config --global user.name "Jenkins"
             git remote set-url origin https://${GITHUB_TOKEN}@github.com/mhmdmstfa2010/solar-system-gitops.git
@@ -193,103 +178,143 @@ pipeline {
         }
       }
     }
+
     stage('k8s-raise-PR') {
-      when {
-       branch 'PR*'
-      }
+      when { branch 'PR*' }
       steps {
-       sh """
-            curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
-              -d '{
-                "title": "Update solar-system-gitea image to ${GIT_COMMIT}",
-                "body": "Update docker image to ${GIT_COMMIT}",
-                "head": "feature-${BUILD_ID}",
-                "base": "main"
-              }'
-          """
+        sh """
+          curl -X POST https://api.github.com/repos/mhmdmstfa2010/solar-system-gitops/pulls \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -d '{
+            "title": "Update solar-system-gitea image to ${GIT_COMMIT}",
+            "body": "Update docker image to ${GIT_COMMIT}",
+            "head": "feature-${BUILD_ID}",
+            "base": "main"
+          }'
+        """
       }
     }
+
     stage('APP deployed?') {
-      when {
-       branch 'PR*'
-      }
+      when { branch 'PR*' }
       steps {
         timeout(time: 1, unit: 'DAYS') {
-         input message: 'Is the app deployed?', ok: 'Yes'
+          input message: 'Is the app deployed?', ok: 'Yes'
         }
       }
     }
-    // stage('DAST Scan') {
-      // when {
-      //  branch 'PR*'
-      // }
-      // steps {
-      //  sh '''
-      //  chmod 777 $(pwd)
-      //  docker run -v $(pwd):/zap/wrk/:rw  ghcr.io/zaproxy/zaproxy  zap-api-scan.py  \
-      //  -t http://192.168.49.2:32134/api-docs \
-      //  -f openapi \
-      //  -r zap-report.html \
-      //  -J zap-report.json \
-      //  -x zap-report.xml \
-      //  -w zap-report.md 
-      //  #### -c zap_ignore_rules
-      //  '''
-      // }
-    // }
-
+   // stage('DAST Scan') {
+     //   when { branch 'PR*' }
+      //  steps {
+      //    sh '''
+        //    chmod 777 $(pwd)
+      //      docker run -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
+      //      -t http://192.168.49.2:32134/api-docs \
+      //      -f openapi \
+      //      -r zap-report.html \
+      //      -J zap-report.json \
+      //      -x zap-report.xml \
+      //      -w zap-report.md
+      //    '''
+       // }
+    //}
     stage('uploud DAST Scan to s3') {
-     when {
-       branch 'PR*'
-     }
+      when { branch 'PR*' }
       steps {
         withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
-        sh '''
-         mkdir reports-${BUILD_ID}
-         cp -rf coverage/ reports-${BUILD_ID}
-         cp dependency*.*  test-results.xml trivy*.* zap*.* reports-${BUILD_ID}
-         ls -ltr reports-${BUILD_ID}
-        '''
-        s3Upload(
-          bucket: 'solar-system-reports-jenkis-pip',
-          path: "jenkins-${BUILD_ID}/",
-          file: "reports-${BUILD_ID}"
-        )
+          sh '''
+            mkdir reports-${BUILD_ID}
+            cp -rf coverage/ reports-${BUILD_ID}
+            cp dependency*.* test-results.xml trivy*.* zap*.* reports-${BUILD_ID}
+            ls -ltr reports-${BUILD_ID}
+          '''
+          s3Upload(
+            bucket: 'solar-system-reports-jenkis-pip',
+            path: "jenkins-${BUILD_ID}/",
+            file: "reports-${BUILD_ID}"
+          )
         }
       }
     }
-    stage('Deploy to prod') {
-      when {
-       branch 'main'
-      }
+
+    stage('Deploy to prod?') {
+      when { branch 'main' }
       steps {
         timeout(time: 1, unit: 'DAYS') {
-          input message: 'Doployed to prod?', ok: 'Yes', submitter: 'admin'
-        }
-
-        
-      }
-  
-  }
-  }
-  post {
-    always {
-      script {
-        if (fileExists('solar-system-gitops')) {
-          sh 'rm -rf solar-system-gitops'
+          input message: 'Deployed to prod?', ok: 'Yes', submitter: 'admin'
         }
       }
-       //publishHTML target: ([
-       // allowMissing: true,
-        //alwaysLinkToLastBuild: true,
-        //keepAll: true,
-        //reportDir: './',
-        //reportFiles: 'zap-report.html',
-        //reportName: 'ZAP Report',
-        //useWrapperFileDirectory: true])
-       }
     }
-   
+
+    stage('lambda deploy') {
+      when { branch 'main' }
+      steps {
+        withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+          sh 'tail -5 app.js'
+          sh '''
+            sed -i "s/^app\\.listen(3000.*)/\\/\\/ &/" app.js
+            sed -i "s/^module\\.exports = app;/\\/\\/ &/" app.js
+            sed -i "s/^\\/\\/ module\\.exports.handler/module.exports.handler/" app.js
+            echo "***********************"
+            tail -5 app.js
+          '''
+          sh '''
+            zip -qr solar-system-lambda-$BUILD_ID.zip app* package* index.html node*
+            ls -ltr solar-system-lambda-$BUILD_ID.zip
+          '''
+          s3Upload(
+            file: "solar-system-lambda-${BUILD_ID}.zip",
+            bucket: 'solar-sys-lambda-bucket'
+          )
+          sh '''
+            aws lambda update-function-code \
+              --function-name solar-system \
+              --s3-bucket solar-sys-lambda-bucket \
+              --s3-key solar-system-lambda-$BUILD_ID.zip
+          '''
+        }
+      }
+    }
+
+    stage('lambda invoke function') {
+      when { branch 'main' }
+      steps {
+      withAWS(credentials: 'AWS_Creds', region: 'us-east-1') {
+            sh '''
+              sleep 30
+              function_url_data=$(aws lambda get-function-url-config --function-name solar-system)
+              function_url=$(echo "$function_url_data" | jq -r '.FunctionUrl | sub("/$"; "")')
+              status_code=$(curl -s -o /dev/null -w "%{http_code}" $function_url/live)
+              echo "Lambda /live HTTP status: $status_code"
+              if [ "$status_code" -eq 200 ]; then
+                echo "Lambda /live endpoint is OK"
+              else
+                echo "Lambda /live endpoint NOT OK"
+                exit 1
+              fi
+            '''
+          }
+
+        }
+      }
+    } // end of stages
+ post {
+    success {
+        slackSend channel: '#general', message: "✅ Pipeline succeeded for Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' \nURL: ${env.BUILD_URL}"
+    }
+    failure {
+        slackSend channel: '#general', message: "❌ Pipeline failed for Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' \nURL: ${env.BUILD_URL}"
+    }
+    always {
+        echo "DAST Scan finished, reports are in zap-report.* files"
+        script {
+            if (fileExists('solar-system-gitops')) {
+                sh 'rm -rf solar-system-gitops'
+            }
+        }
+    }
+  }
+ 
 }
+
