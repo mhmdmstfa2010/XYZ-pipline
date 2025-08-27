@@ -204,6 +204,7 @@ pipeline {
         }
       }
     }
+
    // stage('DAST Scan') {
      //   when { branch 'PR*' }
       //  steps {
@@ -219,6 +220,7 @@ pipeline {
       //    '''
        // }
     //}
+
     stage('uploud DAST Scan to s3') {
       when { branch 'PR*' }
       steps {
@@ -305,6 +307,7 @@ pipeline {
     }
     failure {
         slackSend channel: '#general', message: "❌ Pipeline failed for Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' \nURL: ${env.BUILD_URL}"
+
     }
     always {
         echo "DAST Scan finished, reports are in zap-report.* files"
@@ -314,6 +317,7 @@ pipeline {
             }
         }
     }
+
   }
  
 }
