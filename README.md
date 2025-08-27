@@ -17,14 +17,6 @@
 ### Jenkins Pipeline Dashboard
 ![Jenkins Pipeline](images/jenkins-pipeline.png)
 
-### Slack Notifications
-![Slack Notifications](images/slack-notifications.png)
-
-### SonarQube Quality Dashboard
-![SonarQube Dashboard](images/sonarqube.png)
-
-### Trivy Security Scan Results
-![Trivy Security Scan](images/trivy-scan.png)
 
 ---
 
@@ -609,25 +601,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
----
-
-## 📞 Support & Resources
-
-### **Documentation**
-- **Project Wiki**: [GitHub Wiki](https://github.com/mhmdmstfa2010/solar-system-gitea/wiki)
-- **API Documentation**: [OpenAPI Spec](oas.json)
-- **Pipeline Documentation**: [Jenkinsfile](Jenkinsfile)
-
-### **Community**
-- **Issues**: [GitHub Issues](https://github.com/mhmdmstfa2010/solar-system-gitea/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/mhmdmstfa2010/solar-system-gitea/discussions)
-- **Pull Requests**: [GitHub PRs](https://github.com/mhmdmstfa2010/solar-system-gitea/pulls)
-
-### **Tools & Services**
-- **Jenkins**: [Pipeline Dashboard](https://jenkins.example.com)
-- **SonarQube**: [Quality Dashboard](https://sonarqube.example.com)
-- **Docker Hub**: [Container Registry](https://hub.docker.com/r/mohamed710/solar-system-gitea)
 
 ---
 
