@@ -12,11 +12,13 @@
 ## 📸 Screenshots
 
 ### Application UI
-![Solar System App Interface](images/ui.png)
+![Solar System App Interface](pics/Screenshot from 2025-08-27 08-19-06.png)
+![Solar System App Interface](pics/Screenshot from 2025-08-27 08-20-25.png)
 
 ### Jenkins Pipeline Dashboard
-![Jenkins Pipeline](images/jenkins-pipeline.png)
-
+![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-16-40.png)
+![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-14-56.png)
+![Jenkins Pipeline](pics/Screenshot from 2025-08-27 08-15-14.png)
 
 ---
 
