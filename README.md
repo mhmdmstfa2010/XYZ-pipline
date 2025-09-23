@@ -1,5 +1,23 @@
 # 🚀 Solar System App - DevOps Project
 
+## 🏗️ Architecture
+
+![System Architecture](pics/xyz-pipline.png)
+
+### Architecture Overview
+
+The Solar System DevOps project implements a comprehensive CI/CD pipeline with multi-environment deployment strategy:
+
+- **Frontend**: HTML/CSS/JavaScript client interface
+- **Backend**: Node.js/Express API with MongoDB database
+- **CI/CD Pipeline**: Jenkins with comprehensive security scanning and quality gates
+- **Deployment Targets**: 
+  - AWS EC2 (Feature branches)
+  - Kubernetes (PR branches via GitOps)
+  - AWS Lambda (Production)
+- **Security**: SAST, DAST, dependency scanning, and container security
+- **Monitoring**: Health checks, Slack notifications, and comprehensive reporting
+
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://jenkins.example.com)
 [![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://sonarqube.example.com)
 [![Docker Image](https://img.shields.io/badge/docker-mohamed710%2Fsolar--system--gitea-blue)](https://hub.docker.com/r/mohamed710/solar-system-gitea)
@@ -66,41 +84,6 @@ The **Solar System App** is a comprehensive DevOps demonstration project that sh
 - **Security Report** archiving and S3 storage
 - **Slack Notifications** for build status
 - **Comprehensive Logging** across all environments
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DevOps Architecture                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │    │   Database      │
-│   (HTML/CSS/JS) │◄──►│   (Node.js/     │◄──►│   (MongoDB)     │
-│                 │    │    Express)     │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        CI/CD Pipeline (Jenkins)                           │
-│                                                                             │
-│  Code → Test → Security → Build → Container → Deploy → Monitor → Notify   │
-│    │      │      │        │         │         │         │         │       │
-│    ▼      ▼      ▼        ▼         ▼         ▼         ▼         ▼       │
-│  Git    Mocha  OWASP   Docker   Trivy    AWS/K8s   Health   Slack      │
-│         Chai   ZAP     Build    Scan     Deploy    Check    Alert      │
-└─────────────────────────────────────────────────────────────────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   AWS EC2       │    │   Kubernetes    │    │   AWS Lambda    │
-│   (Feature)     │    │   (PR Branch)   │    │   (Production)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
 
 ---
 
