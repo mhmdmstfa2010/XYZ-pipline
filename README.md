@@ -2,7 +2,7 @@
 
 ## 🏗️ Architecture
 
-![System Architecture](pics/xyz-pipline.png)
+![System Architecture](pics/xyz-pipeline.png)
 
 ### Architecture Overview
 
